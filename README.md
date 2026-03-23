@@ -9,7 +9,7 @@ A high-density, visually rich `tmux` configuration with Powerline-style window t
 ## Features
 - **Powerline-style Tabs:** Smooth arrow transitions between window tabs.
 - **Process Icons:** Automatic icons for processes like `btop` (󰍛), `claude`, `ssh` (󰒍), `k9s` (󰠳), and more.
-- **Dynamic Status Bar:** Modules (CPU, Battery, Weather, Podman, Kubernetes) that resize based on your terminal width.
+- **Dynamic Status Bar:** Modules (CPU, Battery, Weather, Podman, Kubernetes) that dynamically hide or show based on your terminal width to prevent clutter.
 - **Smart Weather:** A custom weather script with Day/Night logic that displays moon phases at night and dynamically changes the status bar color based on the actual weather (e.g., sunny blue, stormy grey, overcast teal).
 - **Catppuccin Mocha Theme:** A beautiful dark theme with custom accent colors.
 - **Vim Bindings:** Full Vim-style navigation and selection within tmux.
