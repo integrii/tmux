@@ -50,14 +50,23 @@ Start a new tmux session and press `Prefix + I` (Capital I) to install the plugi
 - **Reload Config:** `Prefix + r`
 - **Search History:** `Prefix + /` (via tmux-copycat)
 
-## Plugins & Scripts
+## Status Bar Modules
 
-This configuration relies on several custom scripts located in the `scripts/` directory to provide its rich functionality:
+The status bar is designed to be high-density but clean, automatically hiding modules based on your terminal width to prevent overlap.
 
-- **`kubectl.tmux.sh`**: Displays the current Kubernetes context and namespace (requires `kubectx` and `kubens`).
-- **`podman.tmux.sh`**: Shows the active Podman machine name, or "local" if using the default machine.
-- **`resize-tmux-modules.sh`**: Dynamically hides or shows status bar modules (Kubernetes, Podman, Battery, etc.) based on the current terminal width to prevent overlapping.
-- **`tmux-battery-status.sh`**: Provides a color-coded battery percentage and state icon (charging/discharging) using MacOS `pmset`.
-- **`tmux-pane-icon.sh`**: Automatically detects running processes in a pane (like `ssh`, `btop`, `k9s`, or AI tools like `claude` and `gemini`) and assigns a unique icon and color to the window name.
-- **`tmux-weather.sh`**: Fetches weather data from `wttr.in` and provides a dynamic status module. It includes Day/Night logic (showing moon phases at night) and changes the background color based on weather conditions (e.g., blue for sunny, grey for rain).
-- **`tmux-window-style.sh`**: Implements the custom Powerline-style window tabs, including the Nerd Font numeric icons for window indices and the overall status line styling.
+### Top Right (Responsive Modules)
+These modules appear in the top right and hide dynamically as your terminal window gets smaller:
+
+- **Directory:** Shows the current working directory. Always visible.
+- **Kubernetes:** Displays the active `kubectx` context and `kubens` namespace. (Requires `kubectx` and `kubens`)
+- **Podman:** Shows the currently active Podman machine name, or "local" if the default machine is in use.
+- **Battery:** A dynamic battery indicator that changes color (green, orange, red) based on percentage and includes a charging/discharging icon.
+
+### Top Left
+- **Weather:** A smart weather module that fetches data from `wttr.in`. It features:
+  - **Dynamic Colors:** The status bar background color changes based on conditions (e.g., blue for sunny, teal for overcast, grey for rain).
+  - **Day/Night Logic:** Automatically switches between a sun icon and the current moon phase based on local sunrise/sunset times.
+
+### Window Tabs (Center)
+- **Process-Aware Icons:** Window names automatically update based on the running process. For example, running `ssh` will show a 󰒍 icon and the hostname, while `btop` shows a 󰍛 icon. AI tools like `claude`, `gemini`, and `codex` also have unique icons and colors.
+- **Numeric Icons:** Window indices (1, 2, 3...) are displayed using stylized Nerd Font numeric icons for a cleaner look.
