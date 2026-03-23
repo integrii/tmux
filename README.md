@@ -54,7 +54,7 @@ Start a new tmux session and press `Prefix + I` (Capital I) to install the plugi
 
 The status bar is designed to be high-density but clean, automatically hiding modules based on your terminal width to prevent overlap.
 
-### Top Right (Responsive Modules)
+### Right Side Plugins (Responsive Modules)
 These modules appear in the top right and hide dynamically as your terminal window gets smaller:
 
 - **Directory:** Shows the current working directory. Always visible.
@@ -62,11 +62,11 @@ These modules appear in the top right and hide dynamically as your terminal wind
 - **Podman:** Shows the currently active Podman machine name, or "local" if the default machine is in use.
 - **Battery:** A dynamic battery indicator that changes color (green, orange, red) based on percentage and includes a charging/discharging icon.
 
-### Top Left
+### Left Side Plugins
 - **Weather:** A smart weather module that fetches data from `wttr.in`. It features:
   - **Dynamic Colors:** The status bar background color changes based on conditions (e.g., blue for sunny, teal for overcast, grey for rain).
   - **Day/Night Logic:** Automatically switches between a sun icon and the current moon phase based on local sunrise/sunset times.
 
-### Window Tabs (Center)
+### Window Tabs
 - **Process-Aware Icons:** Window names automatically update based on the running process. For example, running `ssh` will show a 󰒍 icon and the hostname, while `btop` shows a 󰍛 icon. AI tools like `claude`, `gemini`, and `codex` also have unique icons and colors.
 - **Numeric Icons:** Window indices (1, 2, 3...) are displayed using stylized Nerd Font numeric icons for a cleaner look.
