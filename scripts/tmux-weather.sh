@@ -1,8 +1,8 @@
 #!/bin/bash
-# Fetch weather for 98332 and return a color-coded tmux status string.
+# Fetch weather for YOUR_LOCATION and return a color-coded tmux status string.
 # Includes Day/Night logic based on sunset and moon phase icons.
 
-CACHE_FILE="/tmp/tmux_weather_cache_98332"
+CACHE_FILE="/tmp/tmux_weather_cache_YOUR_LOCATION"
 CACHE_TTL=900 # 15 minutes
 
 now_ts=$(date +%s)
@@ -11,7 +11,7 @@ last_fetch=$(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)
 if (( now_ts - last_fetch > CACHE_TTL )); then
   # Fetch format: Icon(c) Temp(t) Sunrise(S) Sunset(s) Moon(m)
   # Example output: ☀️+48°F07:07:0119:26:38🌒
-  weather=$(curl -s "wttr.in/98332?u&format=%c%t%S%s%m" | tr -d '+')
+  weather=$(curl -s "wttr.in/YOUR_LOCATION?u&format=%c%t%S%s%m" | tr -d '+')
   if [[ -n "$weather" && ! "$weather" =~ "html" ]]; then
     echo "$weather" > "$CACHE_FILE"
   fi
