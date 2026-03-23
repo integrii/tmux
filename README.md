@@ -1,5 +1,7 @@
 # Eric's Tmux Configuration
 
+![Tmux Overview](assets/overview.png)
+
 A high-density, visually rich `tmux` configuration with Powerline-style window tabs, custom status modules, and automatic window renaming based on the running process (AI tools, SSH, btop, etc.).
 
 ## Features
