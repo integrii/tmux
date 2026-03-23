@@ -1,9 +1,5 @@
-# integrii's Tmux Configuration
+# Eric's Tmux Configuration
 
-<p style="text-align:center;">
-<img width="1251" height="33" alt="image" src="https://github.com/user-attachments/assets/b7d472fd-6b50-4819-9912-7e400870eb41" />
-</p>
-  
 A high-density, visually rich `tmux` configuration with Powerline-style window tabs, custom status modules, and automatic window renaming based on the running process (AI tools, SSH, btop, etc.).
 
 ## Features
@@ -37,7 +33,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-### 3. Load Plugins
+### 3. Install Plugins
 Start a new tmux session and press `Prefix + I` (Capital I) to install the plugins.
 *Note: The default Prefix is `Ctrl+s`.*
 
@@ -49,11 +45,3 @@ Start a new tmux session and press `Prefix + I` (Capital I) to install the plugi
 - **Last Window:** `Ctrl+s + Ctrl+s`
 - **Reload Config:** `Prefix + r`
 - **Search History:** `Prefix + /` (via tmux-copycat)
-
-## Scripts Included
-- `tmux-pane-icon.sh`: Detects running processes and sets window icons/names.
-- `tmux-window-style.sh`: Manages the Powerline-style tab formatting.
-- `resize-tmux-modules.sh`: Dynamically adjusts the status line based on width.
-- `tmux-battery-status.sh`: Detailed battery level with color-coding and charging status.
-- `tmux-weather.sh`: Local weather display with day/night icons and caching.
-- `kubectl.tmux.sh` / `podman.tmux.sh`: Custom status modules for dev tools.
