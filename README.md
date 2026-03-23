@@ -1,5 +1,9 @@
 # integrii's Tmux Configuration
 
+<p style="text-align:center;">
+<img width="1251" height="33" alt="image" src="https://github.com/user-attachments/assets/b7d472fd-6b50-4819-9912-7e400870eb41" />
+</p>
+  
 A high-density, visually rich `tmux` configuration with Powerline-style window tabs, custom status modules, and automatic window renaming based on the running process (AI tools, SSH, btop, etc.).
 
 ## Features
