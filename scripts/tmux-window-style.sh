@@ -4,12 +4,12 @@
 # Since tmux reports window-status-separator is already '',
 # the "gap" must be literal space characters at the END of our format strings.
 
-# Function to map window index to Nerd Font square icons
-# Corrected for base-index 1 and consistent symbols
+# Function to map window index to Nerd Font numeric icons
+# Window 1-9 use Box icons (0-8). Window 5 uses Square 4 (\UF03B1) to avoid hollow box.
+# Window 10 uses Box 10 (\UF0F7D) to show "10" with correct style.
 get_icon_index() {
-  # Map digits 0-9 to their square numeric box icons
-  # 󰎤=0, 󰎧=1, 󰎪=2, 󰎭=3, 󰎰=4, 󰎳=5, 󰎶=6, 󰎹=7, 󰎼=8, 󰎿=9
-  echo "#{?#{==:#I,0},󰎤,#{?#{==:#I,1},󰎧,#{?#{==:#I,2},󰎪,#{?#{==:#I,3},󰎭,#{?#{==:#I,4},󰎰,#{?#{==:#I,5},󰎳,#{?#{==:#I,6},󰎶,#{?#{==:#I,7},󰎹,#{?#{==:#I,8},󰎼,#{?#{==:#I,9},󰎿,#I}}}}}}}}}}"
+  # 1=󰎤, 2=󰎧, 3=󰎪, 4=󰎭, 5=󰎱, 6=󰎳, 7=󰎶, 8=󰎹, 9=󰎼, 10=󰽽
+  echo "#{?#{==:#I,1},󰎤,#{?#{==:#I,2},󰎧,#{?#{==:#I,3},󰎪,#{?#{==:#I,4},󰎭,#{?#{==:#I,5},󰎱,#{?#{==:#I,6},󰎳,#{?#{==:#I,7},󰎶,#{?#{==:#I,8},󰎹,#{?#{==:#I,9},󰎼,#{?#{==:#I,10},󰽽,#I}}}}}}}}}}"
 }
 
 ICON_I=$(get_icon_index)
