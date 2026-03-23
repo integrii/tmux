@@ -49,3 +49,15 @@ Start a new tmux session and press `Prefix + I` (Capital I) to install the plugi
 - **Last Window:** `Ctrl+s + Ctrl+s`
 - **Reload Config:** `Prefix + r`
 - **Search History:** `Prefix + /` (via tmux-copycat)
+
+## Plugins & Scripts
+
+This configuration relies on several custom scripts located in the `scripts/` directory to provide its rich functionality:
+
+- **`kubectl.tmux.sh`**: Displays the current Kubernetes context and namespace (requires `kubectx` and `kubens`).
+- **`podman.tmux.sh`**: Shows the active Podman machine name, or "local" if using the default machine.
+- **`resize-tmux-modules.sh`**: Dynamically hides or shows status bar modules (Kubernetes, Podman, Battery, etc.) based on the current terminal width to prevent overlapping.
+- **`tmux-battery-status.sh`**: Provides a color-coded battery percentage and state icon (charging/discharging) using MacOS `pmset`.
+- **`tmux-pane-icon.sh`**: Automatically detects running processes in a pane (like `ssh`, `btop`, `k9s`, or AI tools like `claude` and `gemini`) and assigns a unique icon and color to the window name.
+- **`tmux-weather.sh`**: Fetches weather data from `wttr.in` and provides a dynamic status module. It includes Day/Night logic (showing moon phases at night) and changes the background color based on weather conditions (e.g., blue for sunny, grey for rain).
+- **`tmux-window-style.sh`**: Implements the custom Powerline-style window tabs, including the Nerd Font numeric icons for window indices and the overall status line styling.
