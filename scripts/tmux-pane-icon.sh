@@ -7,16 +7,21 @@
 [[ -z "$1" ]] && exit 0
 
 win_id="$3"
-child_info=$(ps -ax -o ppid=,comm=,args= | awk -v ppid="$1" '$1 == ppid {print $0; exit}')
 
-if [[ -z "$child_info" ]]; then
+# Use pgrep to find direct children — avoids scanning all processes
+child_pid=$(pgrep -P "$1" | head -1)
+
+if [[ -z "$child_pid" ]]; then
   [[ -n "$win_id" ]] && tmux set-option -wuq -t "$win_id" @pane_icon 2>/dev/null
   exit 0
 fi
 
-child_args=$(echo "$child_info" | sed -E 's/^[[:space:]]*[0-9]+[[:space:]]+[^[:space:]]+[[:space:]]+//')
+# Get only args for the single child PID
+child_args=$(ps -o args= -p "$child_pid" 2>/dev/null)
+[[ -z "$child_args" ]] && exit 0
 
-case "$(echo "$child_args" | tr '[:upper:]' '[:lower:]')" in
+shopt -s nocasematch
+case "$child_args" in
   *ssh*)
     hostname=$(echo "$child_args" | awk '{
       for (i=1; i<=NF; i++) {
@@ -49,8 +54,8 @@ case "$(echo "$child_args" | tr '[:upper:]' '[:lower:]')" in
     [[ -n "$win_id" ]] && tmux set-option -wq -t "$win_id" @pane_icon "#[fg=#A855F7,bold]✦ "
     basename "$2";;
   *k9s*)
-    [[ -n "$win_id" ]] && tmux set-option -wq -t "$win_id" @pane_icon "#[fg=#326CE5]󰠳  "
-    echo "k9s";;
+    [[ -n "$win_id" ]] && tmux set-option -wq -t "$win_id" @pane_icon "#[fg=#116FE0]󰠳" # keep the font spacing in front for balancing without any title
+    echo " ";;
   *opencode*)
     [[ -n "$win_id" ]] && tmux set-option -wq -t "$win_id" @pane_icon "#[fg=#60A5FA]󰅩  "
     basename "$2";;

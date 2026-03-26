@@ -1,28 +1,17 @@
 #!/bin/bash
-# Powerline window tabs - Flush end-to-end
+# Powerline window tabs - context-aware arrows
 #
-# Since tmux reports window-status-separator is already '',
-# the "gap" must be literal space characters at the END of our format strings.
+# Each tab's leading/trailing arrows adapt based on whether adjacent
+# windows are active, inactive, first, or last.
+#
+# Requires @active_idx to be set via hook (see tmux.conf):
+#   set-hook -g after-select-window 'set -gF @active_idx "#{window_index}"'
 
-# Function to map window index to Nerd Font numeric icons
-# Window 1-9 use Box icons (0-8). Window 5 uses Square 4 (\UF03B1) to avoid hollow box.
-# Window 10 uses Box 10 (\UF0F7D) to show "10" with correct style.
-get_icon_index() {
-  # 1=󰎤, 2=󰎧, 3=󰎪, 4=󰎭, 5=󰎱, 6=󰎳, 7=󰎶, 8=󰎹, 9=󰎼, 10=󰽽
-  echo "#{?#{==:#I,1},󰎤,#{?#{==:#I,2},󰎧,#{?#{==:#I,3},󰎪,#{?#{==:#I,4},󰎭,#{?#{==:#I,5},󰎱,#{?#{==:#I,6},󰎳,#{?#{==:#I,7},󰎶,#{?#{==:#I,8},󰎹,#{?#{==:#I,9},󰎼,#{?#{==:#I,10},󰽽,#I}}}}}}}}}}"
-}
+tmux set -g window-status-format "#{?#{==:#{window_index},1},,#{?#{==:#{e|-:#{window_index},1},#{@active_idx}},,}}#[fg=#999999,bg=#404040,bold] #{?#{==:#I,1},1,#{?#{==:#I,2},2,#{?#{==:#I,3},3,#{?#{==:#I,4},4,#{?#{==:#I,5},5,#{?#{==:#I,6},6,#{?#{==:#I,7},7,#{?#{==:#I,8},8,#{?#{==:#I,9},9,#{?#{==:#I,10},10,#I}}}}}}}}}} #[nobold,fg=#404040,bg=#3a3a3a] #{@pane_icon}#[fg=#777777,bg=#3a3a3a]#W #{?#{==:#{window_index},#{session_windows}},#[fg=#3a3a3a#,bg=default],#{?#{==:#{e|+:#{window_index},1},#{@active_idx}},#[fg=#3a3a3a#,bg=#0060CC],#[fg=#3a3a3a#,bg=#404040]}}"
 
-ICON_I=$(get_icon_index)
+tmux set -g window-status-current-format "#{?#{==:#{window_index},1},,}#[fg=#FFFFFF,bg=#0060CC,bold] #{?#{==:#I,1},1,#{?#{==:#I,2},2,#{?#{==:#I,3},3,#{?#{==:#I,4},4,#{?#{==:#I,5},5,#{?#{==:#I,6},6,#{?#{==:#I,7},7,#{?#{==:#I,8},8,#{?#{==:#I,9},9,#{?#{==:#I,10},10,#I}}}}}}}}}} #[nobold,fg=#0060CC,bg=#0080FF] #{@pane_icon}#[fg=#FFFFFF,bg=#0080FF]#W #{?#{==:#{window_index},#{session_windows}},#[fg=#0080FF#,bg=default],#[fg=#0080FF,bg=#404040]}"
 
-# Inactive Window:
-# Ends with the arrow character EXACTLY. No trailing spaces.
-tmux set -g window-status-format "#[fg=#000000,bg=#404040]#[fg=#999999,bg=#404040] $ICON_I #[fg=#404040,bg=#3a3a3a] #{@pane_icon}#[fg=#777777,bg=#3a3a3a]#W #[fg=#3a3a3a,bg=#000000]"
-
-# Active Window:
-# Ends with the arrow character EXACTLY. No trailing spaces.
-tmux set -g window-status-current-format "#[fg=#000000,bg=#0060CC]#[fg=#FFFFFF,bg=#0060CC] $ICON_I #[fg=#0060CC,bg=#0080FF] #{@pane_icon}#[fg=#FFFFFF,bg=#0080FF]#W #[fg=#0080FF,bg=#000000]"
-
-# Double check the separator
+# Separator must be empty for flush tabs
 tmux set -g window-status-separator ""
 
-tmux set -g status-left "#(${HOME}/.sh/tmux-weather.sh)"
+tmux set -g status-left "#(${HOME}/.sh/tmux-weather.sh)#{?#{==:1,#{@active_idx}},#{E:@weather_sep_active},#{E:@weather_sep_inactive}}"

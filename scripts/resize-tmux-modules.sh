@@ -1,6 +1,6 @@
 #!/bin/bash
 # Dynamically adjust tmux status-right modules based on terminal width.
-# Uses catppuccin v2 status module format.
+# Uses integrii theme status module format.
 
 TINY_WIDTH=100
 SMALL_WIDTH=105
@@ -15,18 +15,18 @@ SEP=''
 BATT="#(${HOME}/.sh/tmux-battery-status.sh)"
 
 # Smallest: just directory
-modules='#{E:@catppuccin_status_directory}'
+modules='#{E:@integrii_status_directory}'
 
 if [ "$current_width" -ge "$TINY_WIDTH" ]; then
-        modules="#{E:@catppuccin_status_directory}"
+        modules="#{E:@integrii_status_directory}"
 fi
 
 if [ "$current_width" -ge "$MEDIUM_WIDTH" ]; then
-        modules="#{E:@catppuccin_status_directory}${SEP}#{E:@catppuccin_status_kubernetes}${SEP}${BATT}"
+        modules="#{E:@integrii_status_directory}${SEP}#{E:@integrii_status_kubernetes}${SEP}${BATT}"
 fi
 
 if [ "$current_width" -ge "$LARGE_WIDTH" ]; then
-        modules="#{E:@catppuccin_status_directory}${SEP}#{E:@catppuccin_status_kubernetes}${SEP}#{E:@catppuccin_status_podman}${SEP}${BATT}"
+        modules="#{E:@integrii_status_directory}${SEP}#{E:@integrii_status_kubernetes}${SEP}#{E:@integrii_status_podman}${SEP}${BATT}"
 fi
 
 

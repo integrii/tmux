@@ -50,4 +50,4 @@ elif [[ "$status" == *charging* ]]; then
 fi
 
 # SQUARE THEME: No extra space between icon and percentage
-printf '#[fg=%s,bg=#000000] %s#[fg=#C0C0C0,bg=#000000] %s%% ' "$color" "$icon" "$percentage"
+printf '#[fg=%s,bg=default] %s#[fg=#C0C0C0,bg=default] %s%% ' "$color" "$icon" "$percentage"
