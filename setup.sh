@@ -18,6 +18,25 @@ mkdir -p "$SH_DIR"
 # Get the directory of this script
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Clean up stale symlinks (from previous installs / restructures)
+cleanup_stale_symlinks() {
+    local dir="$1"
+    find "$dir" -type l ! -exec test -e {} \; -print 2>/dev/null | while read -r link; do
+        local target=$(readlink "$link")
+        read -p "  Stale symlink: $link -> $target (remove?) [y/N] " answer
+        if [[ "$answer" =~ ^[Yy] ]]; then
+            rm "$link"
+            echo "  Removed."
+        else
+            echo "  Kept."
+        fi
+    done
+}
+
+echo "Checking for stale symlinks..."
+cleanup_stale_symlinks "$TMUX_CONFIG_DIR"
+cleanup_stale_symlinks "$SH_DIR"
+
 echo "Customizing configuration for location: $LOCATION..."
 # Replace location in scripts and configs
 sed -i '' "s/YOUR_LOCATION/$LOCATION/g" "$REPO_DIR/scripts/tmux-weather.sh"
