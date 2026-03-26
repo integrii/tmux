@@ -1,7 +1,8 @@
 # integrii's Tmux Configuration
 
 <p style="text-align:center;">
-<img width="1470" height="21" alt="image" src="https://github.com/user-attachments/assets/590c0554-3831-4311-ab00-b647a3f8a27d" />
+  <img width="1470" height="26" alt="image" src="https://github.com/user-attachments/assets/7db41a3a-a1b2-4ac6-aa59-02f7c66dc20d" />
+
 </p>
 
 A high-density, visually rich `tmux` configuration with Powerline-style window tabs, custom status modules, and automatic window renaming based on the running process (AI tools, SSH, btop, etc.). The weather stays in the top left to remind you to go outside.
