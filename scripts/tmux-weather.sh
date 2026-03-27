@@ -1,10 +1,17 @@
 #!/bin/bash
-# Fetch weather for YOUR_LOCATION and return a color-coded tmux status string.
+# Fetch weather and return a color-coded tmux status string.
 # Includes Day/Night logic based on sunset and moon phase icons.
 # Caches rendered output (60s) to avoid re-parsing on every 1s status refresh.
+# Set location via: tmux set -g @weather_location "YOUR_ZIP_OR_CITY"
 
-CACHE_FILE="/tmp/tmux_weather_cache_YOUR_LOCATION"
-RENDER_CACHE="/tmp/tmux_weather_render_YOUR_LOCATION"
+LOCATION=$(tmux show -gv @weather_location 2>/dev/null)
+if [[ -z "$LOCATION" ]]; then
+  printf " 󰖐 no location "
+  exit 0
+fi
+
+CACHE_FILE="/tmp/tmux_weather_cache_${LOCATION}"
+RENDER_CACHE="/tmp/tmux_weather_render_${LOCATION}"
 CACHE_TTL=900   # 15 minutes — raw weather fetch
 RENDER_TTL=60   # 60 seconds — rendered output (handles day/night transitions)
 
@@ -20,8 +27,8 @@ fi
 # Fetch new weather data if stale
 last_fetch=$(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)
 if (( now_ts - last_fetch > CACHE_TTL )); then
-  weather=$(curl -s --max-time 3 "wttr.in/YOUR_LOCATION?u&format=%c%t%S%s%m" | tr -d '+')
-  if [[ -n "$weather" && ! "$weather" =~ "html" ]]; then
+  weather=$(curl -s --max-time 3 "wttr.in/${LOCATION}?u&format=%c%t%S%s%m" | tr -d '+')
+  if [[ -n "$weather" && ! "$weather" =~ "html" && ! "$weather" =~ "render failed" && "$weather" =~ °[CF] ]]; then
     echo "$weather" > "$CACHE_FILE"
   fi
 fi

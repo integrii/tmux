@@ -7,9 +7,8 @@ set -e
 TMUX_CONFIG_DIR="$HOME/.config/tmux"
 SH_DIR="$HOME/.sh"
 
-# Prompt for location
-read -p "Enter your location (Zip Code or City) for weather updates [YOUR_LOCATION]: " LOCATION
-LOCATION=${LOCATION:-YOUR_LOCATION}
+# Prompt for location (stored in overlay, not in repo)
+read -p "Enter your location (Zip Code or City) for weather updates [skip]: " LOCATION
 
 echo "Creating directories..."
 mkdir -p "$TMUX_CONFIG_DIR/theme"
@@ -37,9 +36,19 @@ echo "Checking for stale symlinks..."
 cleanup_stale_symlinks "$TMUX_CONFIG_DIR"
 cleanup_stale_symlinks "$SH_DIR"
 
-echo "Customizing configuration for location: $LOCATION..."
-# Replace location in scripts and configs
-sed -i '' "s/YOUR_LOCATION/$LOCATION/g" "$REPO_DIR/scripts/tmux-weather.sh"
+# Write weather location to overlay settings if provided
+if [[ -n "$LOCATION" ]]; then
+  mkdir -p "$TMUX_CONFIG_DIR/overlay"
+  OVERLAY_SETTINGS="$TMUX_CONFIG_DIR/overlay/settings.conf"
+  if [[ -f "$OVERLAY_SETTINGS" ]] && grep -q '@weather_location' "$OVERLAY_SETTINGS"; then
+    sed -i '' "s|^set -g @weather_location .*|set -g @weather_location \"$LOCATION\"|" "$OVERLAY_SETTINGS"
+  else
+    echo "" >> "$OVERLAY_SETTINGS"
+    echo "# Weather widget location (zip code or city)" >> "$OVERLAY_SETTINGS"
+    echo "set -g @weather_location \"$LOCATION\"" >> "$OVERLAY_SETTINGS"
+  fi
+  echo "Weather location set to: $LOCATION"
+fi
 
 echo "Installing configuration files..."
 ln -sf "$REPO_DIR/config/tmux.conf" "$TMUX_CONFIG_DIR/tmux.conf"
