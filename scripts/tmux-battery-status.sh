@@ -2,6 +2,16 @@
 
 set -u
 
+STATUS_CACHE="${TMUX_BATTERY_STATUS_CACHE:-/tmp/tmux_battery_status}"
+STATUS_TTL="${TMUX_BATTERY_STATUS_TTL:-15}"
+now_ts=$(date +%s)
+
+cache_age=$(stat -f %m "$STATUS_CACHE" 2>/dev/null || echo 0)
+if (( now_ts - cache_age < STATUS_TTL )) && [[ -s "$STATUS_CACHE" ]]; then
+        cat "$STATUS_CACHE"
+        exit 0
+fi
+
 if ! command -v pmset >/dev/null 2>&1; then
         exit 0
 fi
@@ -50,4 +60,6 @@ elif [[ "$status" == *charging* ]]; then
 fi
 
 # SQUARE THEME: No extra space between icon and percentage
-printf '#[fg=%s,bg=default] %s#[fg=#C0C0C0,bg=default] %s%% ' "$color" "$icon" "$percentage"
+output="$(printf '#[fg=%s,bg=default] %s#[fg=#C0C0C0,bg=default] %s%% ' "$color" "$icon" "$percentage")"
+printf '%s' "$output" > "$STATUS_CACHE"
+printf '%s' "$output"

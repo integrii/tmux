@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
-# Cache serial number — it never changes
-SERIAL_CACHE="/tmp/tmux_hw_serial"
-if [[ -f "$SERIAL_CACHE" ]]; then
-  SYSTEM_SERIAL=$(<"$SERIAL_CACHE")
-else
-  SYSTEM_SERIAL=$(ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformSerialNumber/{print $4}')
-  echo "$SYSTEM_SERIAL" > "$SERIAL_CACHE"
-fi
-export KUBECONFIG="$HOME/.kube/config.$SYSTEM_SERIAL"
+set -u
 
-echo "$(kubectx -c) 󰿠 $(kubens -c)"
+STATUS_CACHE="${KUBECTL_TMUX_STATUS_CACHE:-/tmp/tmux_kubectl_status}"
+STATUS_TTL="${KUBECTL_TMUX_STATUS_TTL:-30}"
+now_ts=$(date +%s)
+
+cache_age=$(stat -f %m "$STATUS_CACHE" 2>/dev/null || echo 0)
+if (( now_ts - cache_age < STATUS_TTL )) && [[ -s "$STATUS_CACHE" ]]; then
+  cat "$STATUS_CACHE"
+  exit 0
+fi
+
+context="$(kubectx -c 2>/dev/null)"
+namespace="$(kubens -c 2>/dev/null)"
+output="$(printf '%s 󰿠 %s' "$context" "$namespace")"
+printf '%s' "$output" > "$STATUS_CACHE"
+printf '%s' "$output"

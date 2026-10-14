@@ -1,73 +1,73 @@
-# integrii's Tmux Configuration
+# integrii's tmux configuration
 
 <p style="text-align:center;">
   <img width="1470" height="26" alt="image" src="https://github.com/user-attachments/assets/7db41a3a-a1b2-4ac6-aa59-02f7c66dc20d" />
 
 </p>
 
-A high-density, visually rich `tmux` configuration with Powerline-style window tabs, custom status modules, and automatic window renaming based on the running process (AI tools, SSH, btop, etc.). The weather stays in the top left to remind you to go outside.
+A personal tmux setup with a transparent dark theme, Powerline window tabs, responsive status modules, process-aware names, and optional animated agent indicators. The repository contains the general configuration. Machine-specific values belong in `~/.config/tmux/local.conf`.
 
 ## Features
-- **Powerline-style Tabs:** Smooth arrow transitions between window tabs.
-- **Process Icons:** Automatic icons for processes like `btop` (󰍛), `claude`, `ssh` (󰒍), `k9s` (󰠳), and more.
-- **Dynamic Status Bar:** Modules (CPU, Battery, Weather, Podman, Kubernetes) that dynamically hide or show based on your terminal width to prevent clutter.
-- **Smart Weather:** A custom weather script with Day/Night logic that displays moon phases at night and dynamically changes the status bar color based on the actual weather (e.g., sunny blue, stormy grey, overcast teal).
-- **Catppuccin Mocha Theme:** A beautiful dark theme with custom accent colors.
-- **Vim Bindings:** Full Vim-style navigation and selection within tmux.
 
-## Installation
+- `Ctrl-Space` prefix, with `Ctrl-Space` twice to return to the last window.
+- Vim-style pane navigation with `Ctrl-h/j/k/l`, plus `h` and `l` for adjacent windows.
+- Powerline-style tabs with process icons, animated agent status, and a searchable window picker.
+- Clickable weather, Kubernetes, Podman, battery, and directory status segments.
+- Context-sensitive status widths, cached status scripts, NWS alerts, and Podman connection selection.
+- Pane titles are disabled. Shared windows keep stable dimensions when attached clients have different sizes.
+- TPM plugin declarations for sensible defaults, clipboard, Vim navigation, weather, mouse behavior, and history search.
 
-### 1. Prerequisites
-- **Nerd Fonts:** Ensure you are using a [Nerd Font](https://www.nerdfonts.com/) in your terminal for icons.
-- **TPM (Tmux Plugin Manager):**
-  ```bash
-  # Via Homebrew (recommended for macOS)
-  brew install tpm
-  
-  # Or manually
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-  ```
+## Requirements
 
-### 2. Clone and Setup
-Clone this repository and run the setup script to symlink the configuration to your `$HOME` directory:
+- tmux 3.3 or newer.
+- Bash 4 or newer for the optional agent state scripts.
+- Nerd Font for the status icons.
+- TPM for plugin installation.
+- `fzf` for the window picker and Podman selector.
+- Optional: `kubectx` and `kubens`; Podman; `jq` and `curl` for weather alerts.
+
+## Install
 
 ```bash
-git clone https://github.com/your-username/tmux.git ~/git/tmux
+git clone https://github.com/integrii/tmux.git ~/git/tmux
 cd ~/git/tmux
-chmod +x setup.sh
 ./setup.sh
 ```
 
-### 3. Install Plugins
-Start a new tmux session and press `Prefix + I` (Capital I) to install the plugins.
-*Note: The default Prefix is `Ctrl+s`.*
+Setup links the tracked config and scripts into `~/.config/tmux` and `~/.sh`. It asks for a weather location and writes it to the untracked `~/.config/tmux/local.conf`. The public repo does not contain a personal location. Existing local settings are kept.
 
-## Key Bindings
-- **Prefix:** `Ctrl+s`
-- **Vertical Split:** `Prefix + |`
-- **Horizontal Split:** `Prefix + -`
-- **Switch Panes:** `Ctrl + h/j/k/l` (no Prefix needed)
-- **Last Window:** `Ctrl+s + Ctrl+s`
-- **Reload Config:** `Prefix + r`
-- **Search History:** `Prefix + /` (via tmux-copycat)
+Install the declared TPM plugins by pressing `Prefix + I` in tmux. The plugin manager can live at `~/.config/tmux/plugins/tpm/tpm` or the Homebrew path `/opt/homebrew/opt/tpm/share/tpm/tpm`.
 
-## Status Bar Modules
+To enable NWS alerts, add a point for your area to `~/.config/tmux/local.conf`:
 
-The status bar is designed to be high-density but clean, automatically hiding modules based on your terminal width to prevent overlap.
+```tmux
+set -g @weather_alert_point "latitude,longitude"
+```
 
-### Right Side Plugins (Responsive Modules)
-These modules appear in the top right and hide dynamically as your terminal window gets smaller:
+## Key bindings
 
-- **Directory:** Shows the current working directory. Always visible.
-- **Kubernetes:** Displays the active `kubectx` context and `kubens` namespace. (Requires `kubectx` and `kubens`)
-- **Podman:** Shows the currently active Podman machine name, or "local" if the default machine is in use.
-- **Battery:** A dynamic battery indicator that changes color (green, orange, red) based on percentage and includes a charging/discharging icon.
+| Action | Keys |
+| --- | --- |
+| Prefix | `Ctrl-Space` |
+| Last window | `Ctrl-Space`, then `Ctrl-Space` |
+| Previous/next window | `h` / `l` |
+| Navigate panes | `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, `Ctrl-l` |
+| Vertical/horizontal split | `Prefix + |` / `Prefix + -` |
+| New window | `Prefix + c` |
+| Window picker | `Prefix + w` |
+| Reload config | `Prefix + r` |
+| Search backward/forward | `F12` / `Shift-F12` |
+| Search prompt | `Prefix + u` |
+| Cycle layouts | `Prefix + Space` |
 
-### Left Side Plugins
-- **Weather:** A smart weather module that fetches data from `wttr.in`. It features:
-  - **Dynamic Colors:** The status bar background color changes based on conditions (e.g., blue for sunny, teal for overcast, grey for rain).
-  - **Day/Night Logic:** Automatically switches between a sun icon and the current moon phase based on local sunrise/sunset times.
+Mouse support is enabled. Drag a status tab to move its window. Click status segments to open their related picker or popup.
 
-### Window Tabs
-- **Process-Aware Icons:** Window names automatically update based on the running process. For example, running `ssh` will show a 󰒍 icon and the hostname, while `btop` shows a 󰍛 icon. AI tools like `claude`, `gemini`, and `codex` also have unique icons and colors.
-- **Numeric Icons:** Window indices (1, 2, 3...) are displayed using stylized Nerd Font numeric icons for a cleaner look.
+## Optional agent state hooks
+
+`scripts/tmux-agent-state.sh` records `working`, `question`, `idle`, or `error` state for the tmux pane that owns a Codex or Claude hook. `scripts/tmux-agent-stop-state.sh` resets the state after a normal stop. The status renderer also detects agent processes when no hook state is available. This repo does not install or modify agent hook configuration.
+
+## Status modules
+
+The left side shows local weather and the active-window separator. The right side adapts to terminal width and can show the current directory, Kubernetes context and namespace, Podman connection, and battery level. Status values use short-lived cache files under `/tmp`.
+
+The palette uses blue active tabs, grey inactive tabs, and warm accents for weather and Podman. Theme files live in `config/theme/`.
