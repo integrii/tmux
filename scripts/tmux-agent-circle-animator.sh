@@ -4,13 +4,16 @@
 set -u
 shopt -s nullglob nocasematch
 source "$HOME/.sh/tmux-agent-name.sh"
+# Homebrew Bash ships a fractional sleep builtin. Avoid spawning /bin/sleep
+# for every frame (its process startup also makes a 40ms frame miss its budget).
+enable -f "${BASH%/bin/bash}/lib/bash/sleep" sleep 2>/dev/null || true
 
 readonly DIR="${TMPDIR:-/tmp}/tmux-agent-anim-${UID}"
 readonly STATE_DIR="$DIR/state"
 readonly LOCK="$DIR/.circle-lock"
 readonly LOCK_OWNER="$LOCK/pid"
-# 12.5 frames per second. Process scans keep their separate one-second cadence.
-readonly FRAME_MICROSECONDS=80000
+# 25 frames per second. Process discovery and status commands run once a second.
+readonly FRAME_MICROSECONDS=40000
 readonly IDLE_SECONDS=1
 readonly RESCAN_SECONDS=1
 # Nerd Fonts weather moon_alt glyphs: one full lunar cycle, new to waning crescent.
@@ -95,6 +98,11 @@ declare -A pane_icon_cache=()
 declare -A last_pane_indicators=()
 declare -A last_pane_agents=()
 declare -A last_window_icons=()
+declare -a client_targets=()
+status_left=''
+status_right=''
+last_status_left=''
+last_status_right=''
 mapfile -t pane_rows < <(tmux list-panes -a -F '#{window_id}|#{pane_id}|#{pane_pid}|#{pane_current_command}' 2>/dev/null)
 
 # Process discovery is slower than a frame. Run it separately so ps/pgrep and
@@ -116,13 +124,26 @@ scan_panes() {
     fi
     printf '%s|%s|%s\n' "$key" "$agent" "$icon"
   done
+  # refresh-client -S forces every #() job to restart. Keep those commands
+  # off the animation path so weather/context/battery work cannot run at 25 Hz.
+  printf '__status_left||%s\n' "$("$HOME/.sh/tmux-weather.sh")"
+  printf '__status_right||%s\n' "$("$HOME/.sh/tmux-status-right.sh")"
+  while IFS= read -r client; do
+    [[ -z "$client" ]] || printf '__client||%s\n' "$client"
+  done < <(tmux list-clients -F '#{client_name}' 2>/dev/null)
 }
 
 load_scan() {
   local key agent icon
   agent_cache=()
   pane_icon_cache=()
+  client_targets=()
   while IFS='|' read -r key agent icon; do
+    case "$key" in
+      __status_left) status_left=$icon; continue ;;
+      __status_right) status_right=$icon; continue ;;
+      __client) client_targets+=("$icon"); continue ;;
+    esac
     agent_cache[$key]=$agent
     pane_icon_cache[$key]=$icon
   done < "$LOCK/scan"
@@ -133,8 +154,14 @@ scan_pid=''
 scan_panes > "$LOCK/scan"
 load_scan
 next_scan=$((SECONDS + RESCAN_SECONDS))
+next_frame=${EPOCHREALTIME/./}
 while :; do
   frame_started=${EPOCHREALTIME/./}
+  # Keep deadlines on a fixed clock so timer overshoot does not lower the FPS.
+  # After a longer pause, start fresh instead of racing through missed frames.
+  if (( frame_started > next_frame + FRAME_MICROSECONDS )); then
+    next_frame=$frame_started
+  fi
   owner=''
   [[ -f "$LOCK_OWNER" ]] && IFS= read -r owner < "$LOCK_OWNER"
   [[ "$owner" == "$$" ]] || exit 0
@@ -173,10 +200,12 @@ while :; do
 
   for pane_id in "${!last_pane_indicators[@]}"; do
     [[ -n ${seen_panes[$pane_id]:-} ]] && continue
+    tmux set-environment -gu "TMUX_AGENT_PANE_${pane_id#%}" 2>/dev/null
     unset 'last_pane_indicators[$pane_id]' 'last_pane_agents[$pane_id]'
   done
   for window_id in "${!last_window_icons[@]}"; do
     [[ -n ${seen_windows[$window_id]:-} ]] && continue
+    tmux set-environment -gu "TMUX_AGENT_WINDOW_${window_id#@}" 2>/dev/null
     unset 'last_window_icons[$window_id]'
   done
 
@@ -185,15 +214,23 @@ while :; do
     [[ -n ${seen_panes[$pane_id]:-} ]] || rm -f "$state_file"
   done
 
-  # One tmux round-trip per frame paints indicators and fetches the next pane list.
+  # User-option changes redraw every pane and popup. Keep a stable format reference
+  # and animate hidden environment values, which only need a status refresh.
   commands=(list-panes -a -F '#{window_id}|#{pane_id}|#{pane_pid}|#{pane_current_command}')
+  if [[ "$status_left" != "$last_status_left" ]]; then
+    commands+=(';' set-environment -gh TMUX_AGENT_STATUS_LEFT "$status_left")
+    last_status_left=$status_left
+  fi
+  if [[ "$status_right" != "$last_status_right" ]]; then
+    commands+=(';' set-environment -gh TMUX_AGENT_STATUS_RIGHT "$status_right")
+    last_status_right=$status_right
+  fi
   for window_id in "${!seen_windows[@]}"; do
     if [[ ! -v last_window_icons[$window_id] || ${last_window_icons[$window_id]} != "${window_icons[$window_id]:-}" ]]; then
-      if [[ -n ${window_icons[$window_id]:-} ]]; then
-        commands+=(';' set-option -w -t "$window_id" @pane_icons "${window_icons[$window_id]}")
-      else
-        commands+=(';' set-option -wu -t "$window_id" @pane_icons)
+      if [[ ! -v last_window_icons[$window_id] ]]; then
+        commands+=(';' set-option -w -t "$window_id" @pane_icons "#{TMUX_AGENT_WINDOW_${window_id#@}}")
       fi
+      commands+=(';' set-environment -gh "TMUX_AGENT_WINDOW_${window_id#@}" "${window_icons[$window_id]:-}")
       last_window_icons[$window_id]=${window_icons[$window_id]:-}
     fi
   done
@@ -207,14 +244,18 @@ while :; do
       last_pane_agents[$pane_id]=${pane_agents[$pane_id]:-}
     fi
     if [[ ! -v last_pane_indicators[$pane_id] || ${last_pane_indicators[$pane_id]} != "${pane_indicators[$pane_id]:-}" ]]; then
-      if [[ -n ${pane_indicators[$pane_id]:-} ]]; then
-        commands+=(';' set-option -p -t "$pane_id" @pane_indicator "${pane_indicators[$pane_id]}")
-      else
-        commands+=(';' set-option -pu -t "$pane_id" @pane_indicator)
+      if [[ ! -v last_pane_indicators[$pane_id] ]]; then
+        commands+=(';' set-option -p -t "$pane_id" @pane_indicator "#{TMUX_AGENT_PANE_${pane_id#%}}")
       fi
+      commands+=(';' set-environment -gh "TMUX_AGENT_PANE_${pane_id#%}" "${pane_indicators[$pane_id]:-}")
       last_pane_indicators[$pane_id]=${pane_indicators[$pane_id]:-}
     fi
   done
+  if (( ${#commands[@]} > 5 )); then
+    for client in "${client_targets[@]}"; do
+      commands+=(';' refresh-client -S -t "$client")
+    done
+  fi
   mapfile -t pane_rows < <(tmux "${commands[@]}" 2>/dev/null)
   (( ${#pane_rows[@]} > 0 )) || exit 0
 
@@ -230,8 +271,8 @@ while :; do
 
   frame=$(( (frame + 1) % ${#FRAMES[@]} ))
   if (( working > 0 )); then
-    # Include render time in the frame budget instead of adding it to the delay.
-    remaining=$((FRAME_MICROSECONDS - (${EPOCHREALTIME/./} - frame_started)))
+    next_frame=$((next_frame + FRAME_MICROSECONDS))
+    remaining=$((next_frame - ${EPOCHREALTIME/./}))
     if (( remaining > 0 )); then
       printf -v frame_delay '0.%06d' "$remaining"
       sleep "$frame_delay"
@@ -239,5 +280,6 @@ while :; do
   else
     # Keep one owner alive so a hook cannot lose its start during idle shutdown.
     sleep "$IDLE_SECONDS"
+    next_frame=${EPOCHREALTIME/./}
   fi
 done

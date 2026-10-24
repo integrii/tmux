@@ -20,7 +20,7 @@ A personal tmux setup with a transparent dark theme, Powerline window tabs, resp
 ## Requirements
 
 - tmux 3.3 or newer.
-- Bash 4 or newer for the optional agent state scripts.
+- Bash 5 or newer on `PATH` for the status animator (`EPOCHREALTIME` timing).
 - Nerd Font for the status icons.
 - TPM for plugin installation.
 - `fzf` for the window picker and Podman selector.
@@ -69,5 +69,9 @@ Mouse support is enabled. Drag a status tab to move its window. Click status seg
 ## Status modules
 
 The left side shows local weather and the active-window separator. The right side adapts to terminal width and can show the current directory, Kubernetes context and namespace, Podman connection, and battery level. Status values use short-lived cache files under `/tmp`.
+
+The animator starts with the theme and runs slow weather and right-side status commands once per one-second scan, separately from the 25 fps animation redraws. It publishes cached values in hidden tmux environment variables (`TMUX_AGENT_STATUS_LEFT` and `TMUX_AGENT_STATUS_RIGHT`); status formats read those values without starting shell jobs on each redraw.
+
+Run the isolated regression test with `python3 tests/test_animator.py` (requires Bash 5 on `PATH`). It uses mock commands, without touching a real tmux server or the network.
 
 The palette uses blue active tabs, grey inactive tabs, and warm accents for weather and Podman. Theme files live in `config/theme/`.

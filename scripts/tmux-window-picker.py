@@ -119,7 +119,7 @@ def metadata(path, cache):
 def rows(paths=None):
     fields = ['session_id', 'session_name', 'window_id', 'window_index',
               'window_name', 'pane_id', 'pane_current_path',
-              'pane_current_command', '@pane_agent', '@pane_indicator']
+              'pane_current_command', '@pane_agent', 'E:@pane_indicator']
     result = run(['tmux', 'list-panes', '-a', '-F',
                   '\t'.join('#{' + field + '}' for field in fields)])
     if result.returncode:
@@ -140,6 +140,7 @@ def rows(paths=None):
             seen_windows.add(window)
         directory = safe(path)
         label = agent or command
+        label = 'opencode' if label == 'kitty-tmux-shim' else label
         if paths is None:
             branch, changes = metadata(directory, cache)
         else:
@@ -200,7 +201,7 @@ def popup(client):
 
 
 def refresh_icons(items):
-    result = run(['tmux', 'list-panes', '-a', '-F', '#{pane_id}\t#{@pane_indicator}'])
+    result = run(['tmux', 'list-panes', '-a', '-F', '#{pane_id}\t#{E:@pane_indicator}'])
     if result.returncode:
         return
     indicators = dict(line.split('\t', 1) for line in result.stdout.splitlines())
