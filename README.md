@@ -13,14 +13,14 @@ A personal tmux setup with a transparent dark theme, Powerline window tabs, resp
 - Vim-style pane navigation with `Ctrl-h/j/k/l`, plus `h` and `l` for adjacent windows.
 - Powerline-style tabs with process icons, animated agent status, and a searchable window picker.
 - Clickable weather, Kubernetes, Podman, battery, and directory status segments.
-- Context-sensitive status widths, cached status scripts, NWS alerts, and Podman connection selection.
+- Status modules that adapt to terminal width, NWS alerts, and Podman connection selection.
 - Pane titles are disabled. Shared windows keep stable dimensions when attached clients have different sizes.
 - TPM plugin declarations for sensible defaults, clipboard, Vim navigation, weather, mouse behavior, and history search.
 
 ## Requirements
 
 - tmux 3.3 or newer.
-- Bash 5 or newer on `PATH` for the status animator (`EPOCHREALTIME` timing).
+- Bash 5 or newer on `PATH` for animated status indicators.
 - Nerd Font for the status icons.
 - TPM for plugin installation.
 - `fzf` for the window picker and Podman selector.
@@ -68,10 +68,6 @@ Mouse support is enabled. Drag a status tab to move its window. Click status seg
 
 ## Status modules
 
-The left side shows local weather and the active-window separator. The right side adapts to terminal width and can show the current directory, Kubernetes context and namespace, Podman connection, and battery level. Status values use short-lived cache files under `/tmp`.
+The left side shows local weather and alerts. The right side adapts to terminal width and can show the current directory, Kubernetes context and namespace, Podman connection, and battery level. Click a segment to open its related picker or popup.
 
-The animator starts with the theme and runs slow weather and right-side status commands once per one-second scan, separately from the 25 fps animation redraws. It publishes cached values in hidden tmux environment variables (`TMUX_AGENT_STATUS_LEFT` and `TMUX_AGENT_STATUS_RIGHT`); status formats read those values without starting shell jobs on each redraw.
-
-Run the isolated regression test with `python3 tests/test_animator.py` (requires Bash 5 on `PATH`). It uses mock commands, without touching a real tmux server or the network.
-
-The palette uses blue active tabs, grey inactive tabs, and warm accents for weather and Podman. Theme files live in `config/theme/`.
+The palette uses blue active tabs, grey inactive tabs, and warm accents for weather and Podman.
