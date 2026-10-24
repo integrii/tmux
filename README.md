@@ -52,7 +52,7 @@ set -g @weather_alert_point "latitude,longitude"
 | Last window | `Ctrl-Space`, then `Ctrl-Space` |
 | Previous/next window | `h` / `l` |
 | Navigate panes | `Ctrl-h`, `Ctrl-j`, `Ctrl-k`, `Ctrl-l` |
-| Vertical/horizontal split | `Prefix + \|` / `Prefix + -` |
+| Vertical/horizontal split | <code>Prefix + &#124;</code> / `Prefix + -` |
 | New window | `Prefix + c` |
 | Window picker | `Prefix + w` |
 | Reload config | `Prefix + r` |
