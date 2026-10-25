@@ -5,7 +5,7 @@
 
 </p>
 
-A personal tmux setup with a transparent dark theme, Powerline window tabs, responsive status modules, process-aware names, and optional animated agent indicators. The repository contains the general configuration. Machine-specific values belong in `~/.config/tmux/local.conf`.
+My personal tmux setup with a transparent dark theme, Powerline window tabs, responsive status modules, process-aware names, and optional animated agent indicators. The repository contains the general configuration. Machine-specific values belong in `~/.config/tmux/local.conf`.
 
 ## Features
 
